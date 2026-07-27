@@ -10,8 +10,8 @@ import time
 async def work(name, seconds):
     print(f"{name} is working...")
 
-    # await asyncio.sleep(seconds)
-    time.sleep(seconds)         # 换成time.sleep，会导致程序阻塞，直到任务完成
+    await asyncio.sleep(seconds)
+    # time.sleep(seconds)         # 换成time.sleep，会导致程序阻塞，直到任务完成
 
     print(f"{name} is done.")
 
@@ -26,6 +26,22 @@ async def work(name, seconds):
         A is done.
         B is done.
     
+    但是注意：
+    task1 = asyncio.create_task(work("A", 2))
+    task2 = asyncio.create_task(work("B", 3))
+    task3 = asyncio.create_task(work("C", 1))
+
+    await task1
+    await task2
+    await task3
+    以上这种写法是并发的。也就是异步
+    而下边这种写法并不是并发，而是同步的
+    task1 = asyncio.create_task(work("A", 2))
+    await task1
+    task2 = asyncio.create_task(work("B", 3))
+    await task2
+    task3 = asyncio.create_task(work("C", 1))
+    await task3
 """
 async def main():
     task1 = asyncio.create_task(work("A", 2))
@@ -36,7 +52,7 @@ async def main():
     await task2
     await task3
 
-# asyncio.run(main())
+asyncio.run(main())
 
 # -----------------------------------------------------------------------------------------------------------
 
@@ -48,7 +64,7 @@ async def main2():
 
     await asyncio.gather(task1, task2, task3)
 
-asyncio.run(main2())
+# asyncio.run(main2())
 
 """
     总结：
