@@ -6,6 +6,8 @@
  """
 
 from fastapi import APIRouter
+from schemas.user import (UserCreate, UserResponse)
+from services import user_service
 
 # 创建一个路由
 router = APIRouter(
@@ -13,8 +15,15 @@ router = APIRouter(
     tags=["users"]
 )
 
-@router.get("/")
+@router.get("list")
 async def get_users():
-    return {
-        "message": "user list"
-    }
+    return user_service.users
+
+
+# 用户注册
+@router.post(
+    "register",
+    response_model=UserResponse
+)
+async def register(user: UserCreate):
+    return user_service.register_user(user)
