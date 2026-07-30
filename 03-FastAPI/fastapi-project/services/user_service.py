@@ -6,7 +6,8 @@
  """
 
 from fastapi import HTTPException
-from schemas.user import UserCreate
+from schemas.user import UserCreate, UserLogin
+from exceptions.user_exception import UserNotFoundException, UsernameExistException
 
 # 由于目前暂未连接数据库，所以这里使用内存中的列表存储用户数据
 users = []
@@ -17,10 +18,7 @@ def register_user(user: UserCreate):
     # 判断用户名是否已存在
     for item in users:
         if item["username"] == user.username:
-            raise HTTPException(
-                status_code=409,
-                detail="用户名已存在"
-            )
+            raise UsernameExistException()
 
     # 添加用户
     new_user = {
@@ -35,13 +33,32 @@ def register_user(user: UserCreate):
     return new_user
 
 
+# 用户登录
+def login_user(user: UserLogin):
+
+    # 遍历用户列表，判断用户名是否存在
+    for item in users:
+        if item["username"] == user.username:
+            # 判断密码是否正确
+            if item["password"] == user.password:
+                return user
+
+            raise HTTPException(
+                status_code=401,
+                detail="用户名或密码错误"
+            )
+
+    raise HTTPException(
+        status_code=401,
+        detail="用户名或密码错误"
+    )
+
 # 查询用户 根据用户id
 def get_user_byid(user_id: int):
     for item in users:
         if item["id"] == user_id:
             return item
 
-    raise HTTPException(
-        status_code=404,
-        detail="用户不存在"
-    )
+    # 用户如果不存在，直接抛出异常
+    raise UserNotFoundException()
+
