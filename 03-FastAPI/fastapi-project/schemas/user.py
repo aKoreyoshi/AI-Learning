@@ -7,18 +7,23 @@
 
 from pydantic import BaseModel
 
-# 用户创建结构
+# 创建用户
 class UserCreate(BaseModel):
     username: str
     password: str
 
+# 用户登录
+class UserLogin(BaseModel):
+    username: str
+    password: str
 
-# 用户响应结构
+
+# 用户响应
 class UserResponse(BaseModel):
     id: int
     username: str
 
 
-# 用户更新结构
+# 用户更新
 class UserUpdate(BaseModel):
     username: str | None = None
