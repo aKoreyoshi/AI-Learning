@@ -23,7 +23,7 @@ async def get_users():
     return user_service.users
 
 
-# 用户注册
+# 用户注册 (统一返回结果)
 @router.post(
     "/register",
     response_model=ResultModel,
@@ -34,10 +34,10 @@ async def register(user: UserCreate):
     return ResultModel(data=result)
 
 # 用户登录
-@router.post("/login")
+@router.post("/login", response_model=ResultModel)
 async def login(user: UserLogin):
     result = user_service.login_user(user)
-    return {"message": "登录成功"}
+    return ResultModel(message="登录成功")
 
 
 # 获取当前用户信息
@@ -48,7 +48,7 @@ async def profile(
     return user
 
 
-# 查询用户信息
+# 查询用户信息(统一返回结果)
 @router.get(
     "/{user_id}",
     response_model=ResultModel
