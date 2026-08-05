@@ -7,51 +7,50 @@
 
 from fastapi import HTTPException
 from schemas.user import UserCreate, UserLogin
-from exceptions.user_exception import UserNotFoundException, UsernameExistException
+from exceptions.user_exception import (UserNotFoundException, UsernameExistException,
+                                       UsernameIsNoneException, UsernameOrPasswordErrorException)
+from crud.user import get_user_by_username, create_user
+from sqlalchemy.orm import Session
+from models.user import User
+from utils.password import verify_password
 
 # 由于目前暂未连接数据库，所以这里使用内存中的列表存储用户数据
 users = []
 
 # 用户注册
-def register_user(user: UserCreate):
+def register_user(db: Session, username: str, password: str):
+
+    # 用户名不能为空
+    if username is None:
+        raise UsernameIsNoneException()
 
     # 判断用户名是否已存在
-    for item in users:
-        if item["username"] == user.username:
-            raise UsernameExistException()
+    user = get_user_by_username(db, username)
+    if user:
+        raise UsernameExistException()
 
-    # 添加用户
-    new_user = {
-        "id": len(users) + 1,
-        "username": user.username,
-        "password": user.password
-    }
-
-    # 保存添加的用户信息
-    users.append(new_user)
+    # 调用CRUD方法，添加用户
+    new_user = create_user(db, username, password)
 
     return new_user
 
 
 # 用户登录
-def login_user(user: UserLogin):
+def login_user(db: Session, username: str, password: str):
 
-    # 遍历用户列表，判断用户名是否存在
-    for item in users:
-        if item["username"] == user.username:
-            # 判断密码是否正确
-            if item["password"] == user.password:
-                return user
+    # 首先判断用户是否存在
+    user = get_user_by_username(db, username)
+    if user is None:
+        # 用户不存在，直接抛出“用户找不到异常”
+        raise UserNotFoundException()
 
-            raise HTTPException(
-                status_code=401,
-                detail="用户名或密码错误"
-            )
+    # 用户存在，判断密码是否正确
+    flag = verify_password(password, user.password)
+    if not flag:
+        # 密码错误则抛出异常
+        raise UsernameOrPasswordErrorException()
 
-    raise HTTPException(
-        status_code=401,
-        detail="用户名或密码错误"
-    )
+    return user
 
 # 查询用户 根据用户id
 def get_user_byid(user_id: int):
