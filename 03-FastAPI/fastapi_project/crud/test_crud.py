@@ -10,6 +10,7 @@ from crud.user import create_user
 
 db = SessionLocal()
 
+# 添加一条数据
 user = create_user(db, "马聪", "123")
 
 print(user.id)
