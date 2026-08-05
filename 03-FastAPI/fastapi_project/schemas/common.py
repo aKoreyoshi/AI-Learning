@@ -5,13 +5,15 @@
    :date: 2026年07月31日,00:19:51
  """
 
-from typing import Any
+from typing import Generic, TypeVar
 from pydantic import BaseModel
 
-class ResultModel(BaseModel):
+T = TypeVar("T")
+
+class ResultModel(BaseModel, Generic[T]):
     """
     统一返回体模型结构
     """
     code: int = 200
     message: str = "success"
-    data: Any = None
+    data: T | None = None
