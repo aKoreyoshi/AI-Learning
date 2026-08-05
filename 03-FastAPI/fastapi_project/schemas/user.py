@@ -23,6 +23,10 @@ class UserResponse(BaseModel):
     id: int
     username: str
 
+    model_config = {
+        "from_attributes": True
+    }
+
 
 # 用户更新
 class UserUpdate(BaseModel):
